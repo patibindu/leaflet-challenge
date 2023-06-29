@@ -5,6 +5,9 @@ console.log("Start of map using logic_1");
 
 //logic_1 creates the initial tile layers, a layerGroup for the earthquakes and a layer control
 
+//logic_2 gets the USGS earthquake data and creates a circlemarker
+//using a common radius, common color and popup with location, time and magnitude
+
 
 //Create the base layers
 
@@ -31,7 +34,7 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
   };
 
   //Createour map, giving streetmap and earthquakes layers
-  let MyMap = L.map("map", {
+  let myMap = L.map("map", {
     center: [
         37.09, -95.71
     ],
@@ -46,12 +49,44 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     collapsed: false
   }).addTo(myMap);
 
-  //get earthquake data
+  //get earthquake data from USGS
 
   let Url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
 
-  //perform d3.json AJAX to the query URL
+  //perform d3.json AJAX to the URL
 
   d3.json(Url).then(function(data) {
-    console.log(data);
-  });
+    console.log(data.features[0]);
+
+    //create a geoJSON layer using data 
+
+    var geojsonMarkerOptions = {
+      radius: 10,
+      fillColor: "orange",
+      color: "#black",
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.8
+  };
+  
+  L.geoJSON(data, {
+      pointToLayer: function (feature, latlng) {
+          return L.circleMarker(latlng, geojsonMarkerOptions);
+      },
+
+      //use onEachFeature to add popup with location, time and magnitude and length
+      onEachFeature: function onEachFeature(feature, layer) {
+        layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p>
+        <h3>Magnitude: ${feature.properties.mag.toLocaleString()}<h3>
+        <h3>Depth: ${feature.geometry.coordinates[2].toLocaleString()}<h3>
+        `);
+        }
+        
+  }).addTo(myMap);
+
+    // //create a geoJSON layer using data
+    // L.geoJSON(data, {style})
+ 
+
+  //data is not available below this point
+});
