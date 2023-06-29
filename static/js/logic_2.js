@@ -62,7 +62,7 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
 
     var geojsonMarkerOptions = {
       radius: 10,
-      fillColor: "orange",
+      fillColor: "green",
       color: "#black",
       weight: 1,
       opacity: 1,
@@ -82,11 +82,8 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         `);
         }
         
-  }).addTo(myMap);
+  }).addTo(earthquakes);
 
-    // //create a geoJSON layer using data
-    // L.geoJSON(data, {style})
- 
-
+  
   //data is not available below this point
 });
