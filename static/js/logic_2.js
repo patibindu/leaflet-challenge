@@ -31,7 +31,7 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
   };
 
   //Createour map, giving streetmap and earthquakes layers
-  let myMap = L.map("map", {
+  let MyMap = L.map("map", {
     center: [
         37.09, -95.71
     ],
@@ -46,4 +46,12 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     collapsed: false
   }).addTo(myMap);
 
-  
+  //get earthquake data
+
+  let Url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+
+  //perform d3.json AJAX to the query URL
+
+  d3.json(Url).then(function(data) {
+    console.log(data);
+  });
