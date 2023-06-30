@@ -53,7 +53,7 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         37.09, -95.71
     ],
     zoom: 4,
-    layers: [street, earthquakes]
+    layers: [topo, earthquakes, tectonic]
   });
 
   // Create a layer control.
