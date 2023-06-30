@@ -3,16 +3,22 @@ console.log("Start of map using logic_1");
 
 //url = https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson
 
-//logic_1 creates the initial tile layers, a layerGroup for the earthquakes and a layer control
+// logic_1 creates the initial tile layers, a layerGroup for the earthquakes and a layer control
 
-//logic_2 gets the USGS earthquake data and creates a circlemarker
-//using a common radius, common color and popup with location, time and magnitude
+// logic_2 gets the USGS earthquake data and creates a circlemarker
+// using a common radius, common color and popup with location, time and magnitude
 
-//logic_3 creates circleMarker with radius as a function of magnitude
-//color as a function of depth: function called markerColor()
-//with an overall styleInfo function that calls bothstyleInfo()
+// logic_3 creates circleMarker with radius as a function of magnitude
+// color as a function of depth: function called markerColor()
+// with an overall styleInfo function that calls bothstyleInfo()
 
-//Create the base layers
+// logic_4 creates a basic legend for the color used to 
+// indicate depth of the earthquake and add info box to explain circle radius is magnitude
+// and color is a function of depth
+
+// logic_bonus adds tectonic plates layer to our map control layer
+
+// Create the base layers
 
 let street =  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar', 
 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' + 
@@ -28,15 +34,20 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
     "Topographic Map": topo
   };
 
-  //create an empty (new) leaflet layerGroup for earthquakes
+  // create an empty (new) leaflet layerGroup for earthquakes
   let earthquakes = new L.layerGroup();
+
+  // create an empty (new) leaflet layerGroup for tectonic plates
+
+  let tectonic = new L.layerGroup();
 
   // Create an overlay object to hold our overlay.
   let overlayMaps = {
-    "Earthquakes": earthquakes
+    "Earthquakes": earthquakes,
+    "Tectonic Plates" : tectonic,
   };
 
-  //Createour map, giving streetmap and earthquakes layers
+  // Createour map, giving streetmap and earthquakes layers
   let myMap = L.map("map", {
     center: [
         37.09, -95.71
@@ -85,7 +96,7 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
       return {
         radius: markerSize(feature.properties.mag),
         fillColor: markerColor(feature.geometry.coordinates[2]),
-        color: "#black",
+        color: "black",
         weight: 1,
         opacity: 1,
         fillOpacity: 0.8
@@ -111,6 +122,69 @@ let topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         
   }).addTo(earthquakes);
 
+  //add legend
+
+  let legend = L.control({position: 'bottomright'});
+
+  legend.onAdd = function (map) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 25, 50, 100, 150],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    div.innerHTML += 'Depth (km) <br>'
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + markerColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(myMap);
+
+// info control
+
+let info = L.control();
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info'); // create a div with a class "info"
+    this.update();
+    return this._div;
+};
+
+// method that we will use to update the control based on feature properties passed
+info.update = function (props) {
+    this._div.innerHTML = '<h4>USGS Live Earthquake Feed for Past 7 Days</h4>' +  (props ?
+        '<b>' + props.name + '</b><br />' + props.density + ' people / mi<sup>2</sup>'
+        : 'Circle radius is a function of Magnitude' +
+        '<br>' +
+        'Circle color is a function of Depth');
+};
+
+info.addTo(myMap);
+
   
-  //data is not available below this point
+  //data with d3 is only available above this point
 });
+
+// start of tectonic plates
+// get the data from https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json
+
+let tectonicUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json"
+
+  // use d3.json to perform AJAX to get the data
+
+  d3.json(tectonicUrl).then(function(tectonicData) {
+    console.log(tectonicData);
+
+    // use geoJSON()
+    L.geoJSON(tectonicData, {
+      color: "blue",
+      weight: 3,
+
+      //add to tectronic
+    }).addTo(tectonic);
+    })
